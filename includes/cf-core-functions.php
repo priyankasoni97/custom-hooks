@@ -58,20 +58,20 @@ if ( ! function_exists( 'cf_display_posts_html' ) ) {
 	 * Function to display post detail.
 	 */
 	function cf_display_posts_html() {
+		// Fetching posts.
 		$blogpost = cf_get_posts( 'post', 1, 5 );
+
 		// Returns, if posts is empty.
 		if ( empty( $blogpost->posts ) ) {
 			return;
 		}
+
+		// Fetching post columns.
 		$columns = cf_get_posts_columns();
 		?>
 		<table class="table table-bordered">
 			<thead>
 				<tr>
-					<th scope="col">Post ID</th>
-					<th scope="col">Post Title</th>
-					<th scope="col">Post Thumbnail</th>
-					<th scope="col">Post Excerpt</th>
 					<?php
 					if ( ! empty( $columns ) ) {
 						foreach ( $columns as $column ) {
@@ -86,23 +86,24 @@ if ( ! function_exists( 'cf_display_posts_html' ) ) {
 			<tbody>
 				<?php
 				foreach ( $blogpost->posts as $post ) {
-					$post_id        = $post;
-					$post_title     = get_the_title( $post_id );
-					$post_excerpt   = wp_filter_nohtml_kses( get_the_excerpt( $post_id ) ); // Strips all HTML from a post content .
-					$post_thumbnail = get_the_post_thumbnail_url( $post_id, 'thumbnail' );
+					$post_id = $post;
 					?>
 					<tr>
-						<th scope="row"> <?php echo esc_html( $post_id ); ?> </th>
-						<td> <?php echo esc_html( $post_title ); ?> </td>
-						<td> <img src="<?php echo esc_url( $post_thumbnail ); ?>"> </td>
-						<td> <?php echo esc_html( $post_excerpt ); ?> </td>
 						<?php
 						if ( ! empty( $columns ) ) {
 							foreach ( $columns as $column => $value ) {
 								?>
 								<td>
 								<?php
-									// Retrive the custom columns value added using this action hook.
+									/**
+									 * Posts/custom posts listing custom columns value.
+									 *
+									 * This filter helps you to modify the argument for retriving post columns value.
+									 *
+									 * @param string $column Holds column name.
+									 * @param int    $post_id Holds post id.
+									 * @return string
+									 */
 									do_action( 'cf_manage_posts_columns_value', $column, $post_id );
 								?>
 								</td>
@@ -128,12 +129,15 @@ if ( ! function_exists( 'cf_get_posts_columns' ) ) {
 	 * Function for return the posts columns.
 	 *
 	 * @param array $columns Holds posts columns.
+	 * @return array
+	 * @since 1.0.0
 	 */
 	function cf_get_posts_columns( $columns = array() ) {
 		$columns = array(
-			'post_author'  => 'Post Author',
-			'author_email' => 'Author Email',
-			'view'         => 'View',
+			'post_id'        => 'Id',
+			'post_title'     => 'Title',
+			'post_thumbnail' => 'Thumbnail',
+			'post_excerpt'   => 'Excerpt',
 		);
 
 		/**

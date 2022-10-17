@@ -29,65 +29,9 @@ class Cf_Core_Functions_Public {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'cf_wp_enqueue_scripts_callback' ) );
 		add_shortcode( 'cf_list_posts', array( $this, 'cf_list_posts_callback' ) );
 		add_filter( 'cf_manage_posts_columns', array( $this, 'cf_manage_posts_columns_callback' ), 10, 1 );
-		add_action( 'cf_manage_posts_columns_value', array( $this, 'cf_manage_posts_columns_value_callback' ), 10, 2 );
-	}
-
-	/**
-	 * Enqueue scripts for public end.
-	 */
-	public function cf_wp_enqueue_scripts_callback() {
-		// Bootstarap min style.
-		wp_enqueue_style(
-			'bootstrap-min-style',
-			CF_PLUGIN_URL . 'assets/public/css/lib/bootstrap.min.css',
-			array(),
-			filemtime( CF_PLUGIN_PATH . 'assets/public/lib/bootstrap.min.css' ),
-		);
-
-		// Font Awsome Style.
-		wp_enqueue_style( // phpcs:ignore
-			'font-awsome-style',
-			'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css',
-		);
-
-		// Custom public style.
-		wp_enqueue_style(
-			'core-functions-public-style',
-			CF_PLUGIN_URL . 'assets/public/css/core-functions-public.css',
-			array(),
-			filemtime( CF_PLUGIN_PATH . 'assets/public/css/core-functions-public.css' ),
-		);
-
-		// Bootstrap min script.
-		wp_enqueue_script(
-			'bootstrap-min-script',
-			CF_PLUGIN_URL . 'assets/public/js/lib/bootstrap.min.js',
-			array( 'jquery' ),
-			filemtime( CF_PLUGIN_PATH . 'assets/public/js/lib/bootstrap.min.js' ),
-			true
-		);
-
-		// Custom public script.
-		wp_enqueue_script(
-			'core-functions-public-script',
-			CF_PLUGIN_URL . 'assets/public/js/core-functions-public.js',
-			array( 'jquery' ),
-			filemtime( CF_PLUGIN_PATH . 'assets/public/js/core-functions-public.js' ),
-			true
-		);
-
-		// Localize public script.
-		wp_localize_script(
-			'core-functions-public-script',
-			'CF_Public_JS_Obj',
-			array(
-				'ajaxurl'      => admin_url( 'admin-ajax.php' ),
-				'is_blog_page' => is_page( 'blog' ) ? 'yes' : 'no',
-			)
-		);
+		add_action( 'cf_manage_posts_columns_value', array( $this, 'cf_manage_posts_columns_value_callback' ), 100, 2 );
 	}
 
 	/**
@@ -102,29 +46,41 @@ class Cf_Core_Functions_Public {
 	}
 
 	/**
-	 * Function for custom hook action callback.
-	 *
-	 * This filter provide the facility to add custom columns in post list.
+	 * Function for cf_manage_posts_columns action callback.
 	 *
 	 * @param array $columns Holds columns array.
 	 */
 	public function cf_manage_posts_columns_callback( $columns ) {
-		$columns['edit']   = 'Edit';
-		$columns['delete'] = 'Delete';
+		$columns['post_id']      = 'Post Id';
+		$columns['post_author']  = 'Post Author';
+		$columns['author_email'] = 'Author Email';
+		$columns['view']         = 'View';
 
 		return $columns;
 	}
 
 	/**
-	 * Function for custom hook action callback.
-	 *
-	 * This filter provide the facility to add custom columns value in post list.
+	 * Function for cf_manage_posts_columns_value action callback.
 	 *
 	 * @param string $column Holds columns name.
 	 * @param int    $post_id Holds post id.
 	 */
 	public function cf_manage_posts_columns_value_callback( $column, $post_id ) {
 		switch ( $column ) {
+			case 'post_id':
+				echo esc_html( $post_id );
+				break;
+			case 'post_title':
+				echo esc_html( get_the_title( $post_id ) );
+				break;
+			case 'post_thumbnail':
+				$post_thumbnail = get_the_post_thumbnail_url( $post_id, 'thumbnail' );
+				echo '<img src="' . esc_url( $post_thumbnail ) . '" alt="img">';
+				break;
+			case 'post_excerpt':
+				$post_excerpt = wp_filter_nohtml_kses( get_the_excerpt( $post_id ) ); // Strips all HTML from a post content .
+				echo esc_html( $post_excerpt );
+				break;
 			case 'post_author':
 				$author_id = get_post( $post_id )->post_author;
 				$author    = get_userdata( $author_id );
@@ -137,12 +93,6 @@ class Cf_Core_Functions_Public {
 				break;
 			case 'view':
 				echo '<a href="' . esc_url( get_permalink( $post_id ) ) . '">View</a>';
-				break;
-			case 'edit':
-				echo '<a href="#">Edit</a>';
-				break;
-			case 'delete':
-				echo '<a href="#">Delete</a>';
 				break;
 		}
 	}

@@ -41,28 +41,6 @@ if ( ! defined( 'CF_PLUGIN_URL' ) ) {
 }
 
 /**
- * This code runs during the plugin activation.
- * This code is documented in includes/class-cf-core-functions-activator.php
- */
-function activate_core_functions() {
-	require 'includes/class-cf-core-functions-activator.php';
-	Cf_Core_Functions_Activator::run();
-}
-
-register_activation_hook( __FILE__, 'activate_core_functions' );
-
-/**
- * This code runs during the plugin deactivation.
- * This code is documented in includes/class-cf-core-functions-deactivator.php
- */
-function deactivate_core_functions() {
-	require 'includes/class-cf-core-functions-deactivator.php';
-	Cf_Core_Functions_Deactivator::run();
-}
-
-register_deactivation_hook( __FILE__, 'deactivate_core_functions' );
-
-/**
  * Begins execution of the plugin.
  *
  * Since everything within the plugin is registered via hooks,
@@ -73,10 +51,6 @@ register_deactivation_hook( __FILE__, 'deactivate_core_functions' );
  */
 function run_core_funcitons() {
 	require_once 'includes/cf-core-functions.php';
-
-	// The core plugin class that is used to define internationalization and admin-specific hooks.
-	require_once 'includes/class-cf-core-functions-admin.php';
-	new Cf_Core_Functions_Admin();
 
 	// The core plugin class that is used to define internationalization and public-specific hooks.
 	require_once 'includes/class-cf-core-functions-public.php';
@@ -104,7 +78,9 @@ if ( ! function_exists( 'debug' ) ) {
 	 */
 	function debug( $params ) {
 		echo '<pre>';
-		print_r( $params ); // phpcs:ignore
+		// phpcs:disable WordPress.PHP.DevelopmentFunctions
+		print_r( $params );
+		// phpcs:enable
 		echo '</pre>';
 	}
 }
